@@ -81,10 +81,6 @@ Female = sum(Gender$female, na.rm = TRUE)
 Female
 Male = sum(Gender$male, na.rm = TRUE)
 Male
-
-# how many survivors are from class 1, class 2 and class 3
-Gender %>%
-  filter()
 ```
 There are 197 female survivors and 93 male survivors.
 
@@ -103,12 +99,12 @@ By using alpha = 0.5, it can be seen that the p-value for explanatory variable i
 # To see the relationship between Pclass, Age, Fare and Embarked
 Passenger %>%
   ggplot(aes(x = Age, y = Fare, color = Pclass)) + 
-  geom_smooth(method = "lm") + geom_point() 
+  geom_smooth(method = "lm") + geom_point() + theme_bw()
 
 # To see the relationship between Survivors, Age, Fare and Pclass
 Survivor %>%
   ggplot(aes(x = Age, y = Fare, color = Pclass)) + 
-  geom_point() + facet_grid(.~Survived)
+  geom_point() + facet_grid(.~Survived) + theme_bw()
 
 ```
 Bases on the first graph, I can see that fare for passengers from class three were indeed higher than other classes. Based on the second graph, I can see that from class two and three, there were more survivors. From class one, there were more unsurvivor passengers. 
@@ -121,8 +117,7 @@ To be more confident with my answer to my research question, I am adding one mor
 Survivor %>%
   ggplot(aes(Age, Survived, color = Pclass)) +
   stat_smooth(method = "glm", family = "binomial", formula = y~x, alpha = .2, aes(fill = Pclass)) +
-  facet_grid(.~Sex) +
-  theme_bw()
+  facet_grid(.~Sex) + theme_bw()
 ```
 From the graph above, it can be seen that the survivors are more among female than male. For both genders, I can say that survivors mostly came from class one. 
 
