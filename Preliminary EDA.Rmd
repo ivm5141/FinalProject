@@ -1,0 +1,108 @@
+---
+title: "Final Project - Titanic Passengers"
+author: "Iffah Mohamad Saufi"
+output: html_notebook
+---
+
+#### 1) Research Question:
+##### Does survivors mostly came from the first class during the Titanic incident?
+
+#### 2) Data Sources
+##### Primary Source: The data comes from Wikipedia. It was collected after the titanic incident since the survivors were also included in the data.
+
+##### Second Source: From R package called vcdExtra.
+
+##### There are 1309 cases and each of them represents the passenger of the Titanic ship. For this project, I am planning to use survived, class, age and gender variables. 
+
+```{r}
+# clean up R environment
+rm(list = ls())
+
+# load packages
+library(tidyverse)
+library(mosaic)
+library(mdsr)
+library(DataComputing)
+library(vcdExtra)
+```
+
+```{r}
+# Read Primary Data into R
+Passenger <- read.csv("full.csv")
+
+# inspect data
+head(Passenger)
+str(Passenger)
+glimpse(Passenger)
+
+# Read second Data Source
+data("Titanicp")
+
+# inspect data
+head(Titanicp)
+str(Titanicp)
+glimpse(Titanicp)
+```
+
+```{r}
+# Informative plot for second data source
+hist(Titanicp$age, xlab = "Age", main = "Age of Titanic Passengers")
+```
+From the bar graph above, we know that the average of the passenger is around 20-30 years old. 
+
+```{r}
+Titanic <- 
+  Passenger %>%
+  select(Pclass, Survived, Sex, Age, Name) %>%
+  left_join(Titanicp %>% select(survived),
+            by = c("Survived" = "survived"))
+```
+
+```{r}
+# changing the variables
+Titanic$Pclass <- as.factor(Titanic$Pclass)
+Titanic$Survived <- as.numeric(Titanic$Survived)
+Titanic$Sex <- as.factor(Titanic$Sex)
+Titanic$Age <- as.numeric(Titanic$Age)
+
+str(Titanic)
+```
+
+```{r}
+# count the survivors
+Titanic %>%
+  group_by(Sex) %>%
+  summarise(TotalSurvived = sum(Survived, na.rm = TRUE))
+```
+
+```{r}
+# selecting variables that will be used
+PassengerList <-
+  Passenger %>%
+  select("Survived", "Sex", "Pclass", "Age") 
+
+# clean data
+PassengerList <- PassengerList[!is.na(PassengerList$Age),] 
+```
+
+```{r}
+# changing the variables
+PassengerList$Pclass <- as.factor(PassengerList$Pclass)
+PassengerList$Survived <- as.numeric(PassengerList$Survived)
+str(PassengerList)
+```
+
+```{r}
+# Plot to see the relationship of survivors and classes as well as gender
+
+PassengerList %>%
+  ggplot(aes(Age, Survived, color = Pclass)) +
+  stat_smooth(method = "glm", family = "binomial", formula = y~x, alpha = .2, aes(fill = Pclass)) +
+  facet_grid(.~Sex) +
+  theme_bw()
+```
+From the graph above, it can be seen that the survivors are more among female than male. Between female passengers, the survivors mostly come from class two while between male passengers, survivors mostly come from class one. 
+
+
+
+
