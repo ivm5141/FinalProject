@@ -12,7 +12,7 @@ output: html_notebook
 
 ##### Second Source: From R package called vcdExtra.
 
-##### There are 1309 cases and each of them represents the passenger of the Titanic ship. For this project, I am planning to use survived, class, age and gender variables. 
+##### There are 1309 cases and each of them represents the passenger of the Titanic ship. For this project, I am planning to use passenger Id, name, survived, class, age, gender, fare and embarked variables. 
 
 ```{r}
 # clean up R environment
@@ -87,7 +87,6 @@ There are 197 female survivors and 93 male survivors.
 ```{r}
 # Recall my reserarch question: Does survivors mostly came from the first class during the Titanic incident? 
 # I want to see whether passenger's class is significant to the survivors.
-
 RegressModel <- lm(Survived ~ Pclass, data = Survivor)
 RegressModel$coefficients 
 summary(RegressModel)
@@ -113,7 +112,6 @@ To be more confident with my answer to my research question, I am adding one mor
 
 ```{r}
 # Plot to see the relationship of survivors and classes as well as gender
-
 Survivor %>%
   ggplot(aes(Age, Survived, color = Pclass)) +
   stat_smooth(method = "glm", family = "binomial", formula = y~x, alpha = .2, aes(fill = Pclass)) +
