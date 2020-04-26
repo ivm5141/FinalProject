@@ -1,0 +1,131 @@
+---
+title: "Final Project - Titanic Passengers"
+author: "Iffah Mohamad Saufi"
+output: html_notebook
+---
+
+#### 1) Research Question:
+##### Does survivors mostly came from the first class during the Titanic incident?
+
+#### 2) Data Sources
+##### Primary Source: The data comes from Wikipedia. It was collected after the titanic incident since the survivors were also included in the data.
+
+##### Second Source: From R package called vcdExtra.
+
+##### There are 1309 cases and each of them represents the passenger of the Titanic ship. For this project, I am planning to use survived, class, age and gender variables. 
+
+```{r}
+# clean up R environment
+rm(list = ls())
+
+# load packages
+library(tidyverse)
+library(mosaic)
+library(mdsr)
+library(DataComputing)
+library(vcdExtra)
+library(dplyr)
+```
+
+```{r}
+# Read Primary Data into R
+Passenger <- read.csv("full.csv")
+
+# inspect data
+head(Passenger)
+str(Passenger)
+glimpse(Passenger)
+
+# Read second Data Source
+data("Titanicp")
+
+# inspect data
+head(Titanicp)
+str(Titanicp)
+glimpse(Titanicp)
+```
+```{r}
+# changing the survive variable to numeric
+Passenger$Survived <- as.numeric(Passenger$Survived)
+
+# use loop to change Pclass and Sex to factor
+for (i in c("Pclass", "Sex")){
+  Passenger[,i] = as.factor(Passenger[,i])
+}
+
+str(Passenger)
+```
+
+```{r}
+# Creating a new dataframe with some variables that will be used
+Survivor <-
+  Passenger %>%
+  select("PassengerId", "Name", "Pclass", "Survived", "Sex", "Age", "Fare")
+
+# eliminate incomplete subject
+Survivor <- Survivor[!is.na(Survivor$Age),]
+Survivor <- Survivor[!is.na(Survivor$Survived),]
+head(Survivor)
+```
+
+```{r}
+# spreading the Sex variable 
+Gender <- 
+  Survivor %>%
+  group_by(Name, Sex) %>%
+  spread(key = Sex, value = Survived)
+head(Gender)
+
+# counting the number of survivors between male and female
+Female = sum(Gender$female, na.rm = TRUE)
+Female
+Male = sum(Gender$male, na.rm = TRUE)
+Male
+
+# how many survivors are from class 1, class 2 and class 3
+Gender %>%
+  filter()
+```
+There are 197 female survivors and 93 male survivors.
+
+```{r}
+# Recall my reserarch question: Does survivors mostly came from the first class during the Titanic incident? 
+# I want to see whether passenger's class is significant to the survivors.
+
+RegressModel <- lm(Survived ~ Pclass, data = Survivor)
+RegressModel$coefficients 
+summary(RegressModel)
+```
+By using alpha = 0.5, it can be seen that the p-value for explanatory variable is less than alpha. Thus, Pclass is statistically significant to the survivors. It means that the survivors have relationship to which class they were from.
+
+```{r}
+# EDA for Titanic Passenger
+# To see the relationship between Pclass, Age, Fare and Embarked
+Passenger %>%
+  ggplot(aes(x = Age, y = Fare, color = Pclass)) + 
+  geom_smooth(method = "lm") + geom_point() 
+
+# To see the relationship between Survivors, Age, Fare and Pclass
+Survivor %>%
+  ggplot(aes(x = Age, y = Fare, color = Pclass)) + 
+  geom_point() + facet_grid(.~Survived)
+
+```
+Bases on the first graph, I can see that fare for passengers from class three were indeed higher than other classes. Based on the second graph, I can see that from class two and three, there were more survivors. From class one, there were more unsurvivor passengers. 
+
+To be more confident with my answer to my research question, I am adding one more graph by narrowing down the variables to see the relationship of survivors and classes as well as gender.
+
+```{r}
+# Plot to see the relationship of survivors and classes as well as gender
+
+Survivor %>%
+  ggplot(aes(Age, Survived, color = Pclass)) +
+  stat_smooth(method = "glm", family = "binomial", formula = y~x, alpha = .2, aes(fill = Pclass)) +
+  facet_grid(.~Sex) +
+  theme_bw()
+```
+From the graph above, it can be seen that the survivors are more among female than male. For both genders, I can say that survivors mostly came from class one. 
+
+
+
+
