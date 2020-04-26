@@ -43,53 +43,52 @@ head(Titanicp)
 str(Titanicp)
 glimpse(Titanicp)
 ```
-
-```{r}
-# Informative plot for second data source
-hist(Titanicp$age, xlab = "Age", main = "Age of Titanic Passengers")
-```
-From the bar graph above, we know that the average of the passenger is around 20-30 years old. 
-
-```{r}
-Titanic <- 
-  Passenger %>%
-  select(Pclass, Survived, Sex, Age, Name) %>%
-  left_join(Titanicp %>% select(survived),
-            by = c("Survived" = "survived"))
-```
-
 ```{r}
 # changing the variables
-Titanic$Pclass <- as.factor(Titanic$Pclass)
-Titanic$Survived <- as.numeric(Titanic$Survived)
-Titanic$Sex <- as.factor(Titanic$Sex)
-Titanic$Age <- as.numeric(Titanic$Age)
-
-str(Titanic)
+Passenger$Survived <- as.numeric(Passenger$Survived)
+Passenger$Pclass <- as.factor(Passenger$Pclass)
+str(Passenger)
 ```
 
 ```{r}
-# count the survivors
-Titanic %>%
-  group_by(Sex) %>%
-  summarise(TotalSurvived = sum(Survived, na.rm = TRUE))
-```
-
-```{r}
-# selecting variables that will be used
-PassengerList <-
+# Creating a new dataframe with some variables that will be used
+Survivor <-
   Passenger %>%
-  select("Survived", "Sex", "Pclass", "Age") 
+  select("PassengerId", "Name", "Pclass", "Survived", "Sex", "Age")
 
-# clean data
-PassengerList <- PassengerList[!is.na(PassengerList$Age),] 
+# eliminate incomplete subject
+Survivor <- Survivor[!is.na(Survivor$Age),] 
+
+# spreading the Sex variable 
+Gender <- 
+  Survivor %>%
+  group_by(Name, Sex) %>%
+  spread(key = Sex, value = Survived)
+Gender
 ```
 
 ```{r}
-# changing the variables
-PassengerList$Pclass <- as.factor(PassengerList$Pclass)
-PassengerList$Survived <- as.numeric(PassengerList$Survived)
-str(PassengerList)
+# counting the number of survivors between male and female
+Female = sum(Gender$female, na.rm = TRUE)
+Female
+Male = sum(Gender$male, na.rm = TRUE)
+Male
+
+# how many survivors are from class 1, class 2 and class 3
+Gender %>%
+  filter()
+```
+There are 233 female survivors and 109 male survivors.
+
+```{r}
+# Recall my reserarch question: Does survivors mostly came from the first class during the Titanic incident? 
+# We want to see whether passenger's class is significant to the survivors.
+
+RegressModel <- lm(Survived ~ Pclass, data = Survivor)
+RegressModel$coefficients 
+summary(RegressModel)
+
+treeModel <- rpart(Survived ~ Pclass, data = Survivor)
 ```
 
 ```{r}
